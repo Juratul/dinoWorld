@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.0.0/dist/phaser.min.js"></script>
+</head>
+<body>
+
+    <script>
+        var config = {
+            type: Phaser.AUTO,
+            width: window.innerWidth,
+            height: window.innerHeight,
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: { y: 100 },
+                    debug: true
+                }
+            },
+            scene: {
+                preload: preload,
+                create: create,
+                update: update,
+                render: render
+            },        
+        }
+
+        var game = new Phaser.Game(config);
+        let life = 3;
+        function preload ()
+        {   
+            this.load.image('sol', 'assets/sol.jpg');
+            this.load.image('rocher', 'assets/cactus.png');
+            this.load.spritesheet("joueur", "assets/dinoRun.png", { frameWidth: 115, frameHeight: 130});
+            this.load.spritesheet("joueur", "assets/dinoDown.png", {frameWidth:165, frameHeight:95});
+            this.load.spritesheet("coeur", "assets/lp.png", { frameWidth: 65, frameHeight: 60});
+            this.load.spritesheet("map", "assets/map.png", { frameWidth: 4500, frameHeight: 600});
+            this.load.spritesheet("fly", "assets/fly.png", { frameWidth: 135, frameHeight: 90});
+        }
+
+        function create ()
+        {         
+            //map
+            this.map = this.add.sprite(window.innerWidth / 2, window.innerHeight / 2, 'map');
+            console.log(this.map);
+            
+            //map animation
+            var config = {
+                key: 'defil',
+                frames: this.anims.generateFrameNumbers('map'),
+                frameRate: 5,
+                repeat: -1
+            };       
+            this.anims.create(config);
+            this.map.anims.play('defil');
+
+            //hearth
+            this.hearth = this.add.sprite(window.innerWidth / 25, window.innerHeight / 10, "coeur");
+
+            //hearth animation
+            var config = {
+                key: 'bounce',
+                frames: this.anims.generateFrameNumbers('coeur'),
+                frameRate: 4,
+                repeat: -1
+            };
+            this.anims.create(config);
+            this.hearth.anims.play("bounce");
+
+            //player
+            this.player = this.physics.add.sprite(100, 620, 'joueur');
+            this.player.setBounce(0.2);
+            this.player.setCollideWorldBounds(true);
+            
+            //player animation run
+            var config = {
+                key: 'walk',
+                frames: this.anims.generateFrameNumbers('joueur'),
+                frameRate: 9,
+                repeat: -1
+            };        
+            this.anims.create(config);
+            this.player.anims.play('walk'); 
+
+            //player animation down
+            var config = {
+                key: 'down',
+                frames: this.anims.generateFrameNumbers('joueur'),
+                frameRate: 9,
+                repeat: -1
+            };          
+            this.anims.create(config);
+            this.player.anims.play('down');
+
+            //fly
+            this.fly = this.physics.add.sprite(500, 540, 'fly');     
+            this.fly.setCollideWorldBounds(false);
+                     
+            //fly animation
+            var config = {
+                key: 'flyfly',
+                frames: this.anims.generateFrameNumbers('fly'),
+                frameRate: 5,
+                repeat: -1
+            };
+            this.anims.create(config);
+            this.fly.anims.play('flyfly');
+
+            //fly2
+            this.fly2 = this.physics.add.sprite(800, 540, 'fly');     
+            this.fly2.setCollideWorldBounds(false);
+                     
+            //fly animation2
+            var config = {
+                key: 'flyfly2',
+                frames: this.anims.generateFrameNumbers('fly'),
+                frameRate: 5,
+                repeat: -1
+            };           
+            this.anims.create(config);
+            this.fly2.anims.play('flyfly2');
+       
+           //plateformes           
+            platforms = this.physics.add.staticGroup();
+            platforms.create(700, 800, 'sol').setScale(0.2, 0.2);
+            platforms2 = this.physics.add.staticGroup();
+            platforms2.create(700, 700, 'sol').setScale(0.2, 0.2);
+                      
+            //required
+            this.player.setCollideWorldBounds(true);                      
+            this.physics.add.collider(this.player, platforms);
+            this.physics.add.collider(this.fly, platforms);
+            this.physics.add.collider(this.fly2, platforms);
+            this.physics.add.collider(this.fly, platforms2);
+            this.physics.add.collider(this.fly2, platforms2);
+            cursors = this.input.keyboard.createCursorKeys();
+            this.physics.add.overlap(this.player, this.fly, test,  null, this);
+
+            //rocher
+            this.group = this.add.group();     
+                
+        }
+        // END CREATE
+
+        function generate () {
+            //console.log(this.cactus)
+            this.physics.add.collider(this.cactus, platforms);
+            this.cactus =  this.group.create(400, 300, 'rocher');          
+        } 
+         
+        //DODGE FUNCTION
+        function test () {
+            life -= 1;
+        }
+
+        // END CUSTOMS
+        function update ()
+        {
+            //setTimeout(generate.bind(this), 2000);
+            
+            //player saut
+            if (cursors.up.isDown && this.player.body.touching.down){          
+                this.player.setVelocityY(-210);
+            }
+
+            if (cursors.down.isDown && this.player.body.touching.down){          
+                //this.player.y += 10;
+            }
+
+            //map defil
+            //this.map.x -= 1;
+
+            //fly defil 
+            this.fly.x -= 1;
+            this.fly2.x -= 1;
+
+            if (this.fly.x == -10) {
+                this.fly.x = 400;                
+            }
+
+        //END UPDATE      
+        }
+        function render() {
+    
+        }
+    </script>
+
+</body>
+</html>
